@@ -32,26 +32,22 @@ class LeakIXConnector (object):
         try:
             url = "{0}".format (self.base_url)  # https://leakix.net
             response = requests.request ("GET", url)
-            if response.status_code < 500:
-                return True
-            else:
-                return False
+            return response.status_code < 500
         except KeyError:
             return False
 
     def request_handler(self, method, endpoint,
                         **kwargs):
         try:
-            base_url = "{0}/{1}".format (self.base_url,
-                                         endpoint)  # Eg. Base url= https://www.leaix.net #endpoint= host/10.10.10.10
-            if method == "GET":
-                response = requests.request ("GET", base_url,
-                                             headers=self.headers)
-            else:
+            if method != "GET":
                 return {self.result: 'Invalid Method {}\
                          Requested!'.format (method),
                         self.execution_status: self.ERROR}
 
+            base_url = "{0}/{1}".format (self.base_url,
+                                         endpoint)  # Eg. Base url= https://www.leaix.net #endpoint= host/10.10.10.10
+            response = requests.request ("GET", base_url,
+                                         headers=self.headers)
             status_code = response.status_code
             response_data = {'status_code': status_code}
             # response handling
@@ -81,45 +77,40 @@ class LeakIXConnector (object):
         The action is used to check if the given host contains any leaks
         host: Enter the host IP. (Eg: 10.10.10.10)
         '''
-        endpoint = 'search?q=ip:"{}"&scope=leak'.format (host)
-        response = self.request_handler ('GET', endpoint)
-        return response
+        endpoint = f'search?q=ip:"{host}"&scope=leak'
+        return self.request_handler ('GET', endpoint)
 
     def action_get_service(self, host, **kwargs):
         '''
         The action is used to check if the given host contains any services
         host: Enter the host IP. (Eg: 10.10.10.10)
         '''
-        endpoint = 'search?q=ip:"{}"&scope=service'.format (host)
-        response = self.request_handler ('GET', endpoint)
-        return response
+        endpoint = f'search?q=ip:"{host}"&scope=service'
+        return self.request_handler ('GET', endpoint)
 
     def action_search_host(self, host, **kwargs):
         '''
         This action is used to check a particular host for both leaks and services
         host: Enter the host IP
         '''
-        endpoint = 'host/{}'.format (host)
-        response = self.request_handler ('GET', endpoint)
-        return response
+        endpoint = f'host/{host}'
+        return self.request_handler ('GET', endpoint)
 
     def action_search_by_query_for_leak(self, host, **kwargs):
         '''
         This action is used to get data based off a query from the user
         host: Enter the host IP
         '''
-        endpoint = 'search?q={}&scope=leak'.format (host)
-        response = self.request_handler ('GET', endpoint)
-        return response
+        endpoint = f'search?q={host}&scope=leak'
+        return self.request_handler ('GET', endpoint)
 
     def action_search_by_query_for_service(self, host, **kwargs):
         '''
         This action is used to get data based off a query from the user
         host: Enter the host IP
         '''
-        endpoint = 'search?q={}&scope=service'.format (host)
-        response = self.request_handler ('GET', endpoint)
-        return response
+        endpoint = f'search?q={host}&scope=service'
+        return self.request_handler ('GET', endpoint)
 
 
 x = LeakIXConnector ()

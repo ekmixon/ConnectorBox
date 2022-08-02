@@ -33,10 +33,7 @@ class GithubConnector(object):
         try:
             url = "{0}".format(self.base_url)
             response = requests.request("GET", url)
-            if response.status_code < 500:
-                return True
-            else:
-                return False
+            return response.status_code < 500
         except KeyError:
             return False
 
@@ -44,18 +41,14 @@ class GithubConnector(object):
                         **kwargs):
         try:
             base_url = "{0}/{1}".format(self.base_url, endpoint)
-            base_url=str(base_url)
-            if method == "GET":
-                response = requests.get(base_url)
-                if response.status_code == 200:
-                    return response.text
-                else:
-                    return False
-            else:
+            base_url = base_url
+            if method != "GET":
                 return {self.result: 'Invalid Method {}\
                          Requested!'.format(method),
                         self.execution_status: self.ERROR}
 
+            response = requests.get(base_url)
+            return response.text if response.status_code == 200 else False
         except Exception as e:
             response_data = {'response': str(e)}
             execution_status = self.ERROR
@@ -67,32 +60,27 @@ class GithubConnector(object):
         This action is to query and get back information regarding a topic on github
         seach: Enter the search we want to search for
         '''
-        endpoint='search?o=desc&q={}&s=stars&type=Repositories'.format(search)
-        response = self.request_handler('GET',endpoint)
-        return response
+        endpoint = f'search?o=desc&q={search}&s=stars&type=Repositories'
+        return self.request_handler('GET',endpoint)
 
     def search_repo_accoring_to_relavance(self, search, **kwargs):
         '''
         This action is to query and get back information regarding a topic on github based on search_repo_accoring_to_relavance
         search: Enter the search term we want to search for
         '''
-        endpoint = 'search?q={}'.format(search)
-        response = self.request_handler('GET', endpoint)
-        return response
+        endpoint = f'search?q={search}'
+        return self.request_handler('GET', endpoint)
 
     def get_required_data(self, data, **kwargs):
         '''
         This function is to query information from the raw html data
         '''
-        i = []
         if data:
 
             soup = BeautifulSoup(data, 'html.parser')
             data = soup.find_all('a', {'class':'v-align-middle'})
 
-            for item in data:
-                i.append(item.text)
-            return i
+            return [item.text for item in data]
 
 
     def format_search(self, search, **kwargs):
@@ -106,8 +94,7 @@ class GithubConnector(object):
 x=GithubConnector()
 search = str(input("Enter search string: "))
 search=x.format_search(search=search)
-x1=x.search_repo_according_to_stars(search=search)
-if x1:
+if x1 := x.search_repo_according_to_stars(search=search):
     a=x.get_required_data(str(x1))
     print(a)
 else:

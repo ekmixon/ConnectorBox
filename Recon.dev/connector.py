@@ -27,16 +27,15 @@ class Recon (object):
     def request_handler(self, method, endpoint,
                         **kwargs):
         try:
-            base_url = "{0}/{1}".format (self.base_url,
-                                         endpoint) 
-            if method == "GET":
-                response = requests.request ("GET", base_url,
-                                             headers=self.headers)
-            else:
+            if method != "GET":
                 return {self.result: 'Invalid Method {}\
                          Requested!'.format (method),
                         self.execution_status: self.ERROR}
 
+            base_url = "{0}/{1}".format (self.base_url,
+                                         endpoint)
+            response = requests.request ("GET", base_url,
+                                         headers=self.headers)
             status_code = response.status_code
             response_data = {'status_code': status_code}
             # response handling
@@ -68,8 +67,7 @@ class Recon (object):
         '''
         endpoint = 'api/search?key={api}&domain={domain}'.format(api=self.api,
                                                                  domain=domain)
-        response = self.request_handler ('GET', endpoint)
-        return response
+        return self.request_handler ('GET', endpoint)
 
 
 x = Recon ()

@@ -21,8 +21,7 @@ class MitreAttack (object):
         }
 
         collection = Collection (f"https://cti-taxii.mitre.org/stix/collections/{collections['enterprise_attack']}/")
-        src = TAXIICollectionSource (collection)
-        return src
+        return TAXIICollectionSource (collection)
 
     # Method to search retreived TAXII data to filter techniques by name
     def get_technique_by_name(self, thesrc, name):
@@ -45,8 +44,7 @@ class MitreAttack (object):
         ])
 
     def get_data_with_STIX(self, thesrc, data):
-        groups = thesrc.query ([Filter ("type", "=", data)])
-        return groups
+        return thesrc.query ([Filter ("type", "=", data)])
 
     def main(self):
         # Connect to TAXII server and retreive data

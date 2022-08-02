@@ -33,10 +33,7 @@ class CVEConnector(object):
         try:
             url = "{0}".format(self.base_url) #https://cvedetails.com
             response = requests.request("GET", url)
-            if response.status_code < 500:
-                return True
-            else:
-                return False
+            return response.status_code < 500
         except KeyError:
             return False
 
@@ -45,18 +42,14 @@ class CVEConnector(object):
                         **kwargs):
         try:
             base_url = "{0}/{1}".format(self.base_url, endpoint)
-            base_url=str(base_url)
-            if method == "GET":
-                response = requests.get(base_url)
-                if response.status_code == 200:
-                    return response.text
-                else:
-                    return False
-            else:
+            base_url = base_url
+            if method != "GET":
                 return {self.result: 'Invalid Method {}\
                          Requested!'.format(method),
                         self.execution_status: self.ERROR}
 
+            response = requests.get(base_url)
+            return response.text if response.status_code == 200 else False
         except Exception as e:
             response_data = {'response': str(e)}
             execution_status = self.ERROR
@@ -68,18 +61,14 @@ class CVEConnector(object):
         This action is to query and get back information regarding a CVE_ID
         cve_id: Enter the CVE ID we want to search for
         '''
-        endpoint='cve/{}'.format(cve_id)
-        response = self.request_handler('GET',endpoint)
-        return response
+        endpoint = f'cve/{cve_id}'
+        return self.request_handler('GET',endpoint)
 
     def check_if_valid(self, data, **kwargs):
         '''
         This function is to check if the entered CVE ID is check_if_valid
         '''
-        if """Unknown CVE ID""" in data:
-            return False
-        else:
-            return True
+        return """Unknown CVE ID""" not in data
 
     def get_required_data(self, data, **kwargs):
         '''
@@ -87,11 +76,11 @@ class CVEConnector(object):
         '''
         soup = BeautifulSoup(data, 'html.parser')
         summary = soup.find('div', {'class':'cvedetailssummary'})
-        print("Summary of the vulnerability is: "+summary.text.strip())
+        print(f"Summary of the vulnerability is: {summary.text.strip()}")
         score = soup.find('div', {"class": "cvssbox"})
-        print("Vulnerability score is: "+score.text.strip())
+        print(f"Vulnerability score is: {score.text.strip()}")
         confidentiality_impact=soup.find('span',{'class':'cvssdesc'})
-        print("Confidentiality impact is: "+confidentiality_impact.text.strip())
+        print(f"Confidentiality impact is: {confidentiality_impact.text.strip()}")
 
 
 x=CVEConnector()
